@@ -1,9 +1,4 @@
-# This is a sample Python script.
 import abc
-# Press Umschalt+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
 import random
 from enum import Enum
 from itertools import cycle
@@ -41,7 +36,6 @@ class Dennis(Player):
     def __init__(self, playerId):
         self.id = playerId
 
-    @classmethod
     def play(self, currentCount, numberOfLifes, nextPlayerLifes, avgPlayerLives):
         if numberOfLifes == 1:
             return Action.ROLL
@@ -52,13 +46,13 @@ class Dennis(Player):
     def getId(self):
         return self.id
 
+
 class Mario(Player):
     id = -1
 
     def __init__(self, playerId):
         self.id = playerId
 
-    @classmethod
     def play(self, currentCount, numberOfLifes, nextPlayerLifes, avgPlayerLives):
         if numberOfLifes == 1:
             return Action.ROLL
@@ -71,13 +65,13 @@ class Mario(Player):
     def getId(self):
         return self.id
 
+
 class Andre(Player):
     id = -1
 
     def __init__(self, playerId):
         self.id = playerId
 
-    @classmethod
     def play(self, currentCount, numberOfLifes, nextPlayerLifes, avgPlayerLives):
         if numberOfLifes == 1:
             return Action.ROLL
@@ -95,10 +89,10 @@ def roll():
     return random.randint(LOWERST_ROLL, HIGHEST_ROLL)
 
 
-def applyThreeIsZeroRule(roll):
-    if roll == 3:
+def applyThreeIsZeroRule(rollValue):
+    if rollValue == 3:
         return 0
-    return roll
+    return rollValue
 
 
 class Game:
@@ -111,33 +105,36 @@ class Game:
             self.score[player.getId()] = MAX_LIFE
 
     def start(self):
-        #print("Game Started")
+        # print("Game Started")
         currentCount = 0
         running = True
         pool = cycle(self.playerList)
         nextPlayer = next(pool)
         while running:
             player, nextPlayer = nextPlayer, next(pool)
-            action = player.play(currentCount, self.score[player.getId()], self.score[nextPlayer.getId()], sum(self.score.values()) / len(self.score))
+            action = player.play(currentCount, self.score[player.getId()], self.score[nextPlayer.getId()],
+                                 sum(self.score.values()) / len(self.score))
             if action == Action.DECREMENT_LIFE:
                 self.score[player.getId()] = self.score[player.getId()] - 1
-                #print("Player " + str(player.getId()) + " DECREMENT LIFE FROM: " + str(
+                # print("Player " + str(player.getId()) + " DECREMENT LIFE FROM: " + str(
                 #    self.score[player.getId()] + 1) + "-->" + str(
                 #    self.score[player.getId()]))
                 currentCount = 0
                 if self.score[player.getId()] == 0:
-                    #print("Player " + str(player.getId()) + " LOST")
+                    # print("Player " + str(player.getId()) + " LOST")
                     return player
             rollValue = roll()
             currentCount = currentCount + applyThreeIsZeroRule(rollValue)
-            #print("Player " + str(player.getId()) + " ROLL: " + str(rollValue) + " new COUNT: " + str(currentCount))
+            # print("Player " + str(player.getId()) + " ROLL: " + str(rollValue) + " new COUNT: " + str(currentCount))
             if currentCount >= KNOCKOUTROLL:
-                #print("Player " + str(player.getId()) + " LOST")
+                # print("Player " + str(player.getId()) + " LOST")
                 return player
 
 
 def restart_list(lst, restart_index):
     return lst[restart_index:] + lst[:restart_index]
+
+
 class Session:
     playerAndScore = {}
     numberOfGames = 100
@@ -149,19 +146,19 @@ class Session:
         self.numberOfGames = numberOfGames
         self.startrule = startrule
 
-
-    def sortByStartRule(self, players, rule, lastLooserId):
+    @staticmethod
+    def sortByStartRule(players, rule, lastLooserId):
         if rule == StartRule.RANDOMSTART:
             random.shuffle(players)
         if rule == StartRule.LOSERSTARTS:
-            restart_index = players.index(lastLooserId);
+            restart_index = players.index(lastLooserId)
             players = restart_list(players, restart_index)
         return players
 
     def run(self):
         playerList = list(Session.playerAndScore.keys())
         for i in range(self.numberOfGames):
-            #print("Start Game No.: " + str(i + 1))
+            # print("Start Game No.: " + str(i + 1))
             game = Game(playerList)
             loserPlayer = game.start()
             playerList = self.sortByStartRule(playerList, self.startrule, loserPlayer)
@@ -170,7 +167,7 @@ class Session:
     def printResult(self):
         for player, losts in self.playerAndScore.items():
             print("Player " + str(player.getId()) + " of type: " + str(type(player).__name__) + " lost games: " + str(
-                losts) + " lost pct: " + str((losts/sum(self.playerAndScore.values())) * 100) + "%")
+                losts) + " lost pct: " + str((losts / sum(self.playerAndScore.values())) * 100) + "%")
 
 
 def createDennisOnlyGame(numberOfPlayers):
@@ -190,7 +187,5 @@ if __name__ == '__main__':
     session.run()
     print("---------- RESULTS ----------")
     session.printResult()
-
-
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
